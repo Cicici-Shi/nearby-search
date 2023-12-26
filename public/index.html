@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="initial-scale=1.0, user-scalable=no, width=device-width"
+    />
+    <title>附近的充电宝</title>
+    <link
+      rel="stylesheet"
+      href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"
+    />
+    <script src="https://cache.amap.com/lbs/static/es5.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cache.amap.com/lbs/static/addToolbar.js"
+    ></script>
+    <style>
+      html,
+      body,
+      #container {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="font-size: 14px; margin: 10px">
+      <label for="radius">Radius (km):</label>
+      <input
+        type="number"
+        id="radius"
+        placeholder="Enter radius in km"
+        required
+      />
+      <button onclick="searchByRadius()">Search</button>
+      <span
+        >默认半径为0.2，可搜到四个地标。半径改为0.05，就少了文化宫的坐标。</span
+      >
+    </div>
+    <div id="container"></div>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=5ef9c766d273dd460929e3e911877905"></script>
+    <script src="https://unpkg.com/axios@1.5.1/dist/axios.min.js"></script>
+    <script>
+      searchByRadius();
+      function searchByRadius() {
+        // 固定的经度和纬度
+        var longitude = 116.397444;
+        var latitude = 39.909183;
+
+        // 从输入框获取半径
+        var radius = document.getElementById('radius').value || 0.2; // 默认值为0.2km
+
+        axios
+          .get('/nearbySearch', {
+            params: {
+              longitude: longitude,
+              latitude: latitude,
+              radius: radius,
+            },
+          })
+          .then((res) => {
+            const data = res.data;
+
+            // 创建地图实例
+            var map = new AMap.Map('container', {
+              resizeEnable: true,
+              zoom: 11, // 根据需要调整初始缩放级别
+              center: [longitude, latitude],
+            });
+
+            // 清除旧的标记和圆
+            map.clearMap();
+
+            // 添加新的标记
+            data.forEach((item) => {
+              var marker = new AMap.Marker({
+                icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+                position: [item.longitude, item.latitude],
+                anchor: 'bottom-center',
+              });
+              map.add(marker);
+            });
+
+            // 添加圆以表示搜索半径
+            var circle = new AMap.Circle({
+              center: new AMap.LngLat(longitude, latitude), // 圆心位置
+              radius: radius * 1000, // 半径转换为米
+              strokeColor: '#F33', // 线颜色
+              strokeOpacity: 1, // 线透明度
+              strokeWeight: 3, // 线粗细度
+              fillColor: '#ee2200', // 填充颜色
+              fillOpacity: 0.35, // 填充透明度
+            });
+
+            map.add(circle);
+            map.setFitView();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+    </script>
+  </body>
+</html>
