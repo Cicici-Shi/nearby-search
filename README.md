@@ -7,7 +7,7 @@
 1. 克隆仓库到本地：
 
    ```
-   git clone [仓库URL]
+   git clone https://github.com/Cicici-Shi/nearby-search.git
    ```
 
 2. 安装依赖：
